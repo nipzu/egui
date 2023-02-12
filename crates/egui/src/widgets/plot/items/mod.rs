@@ -1202,11 +1202,17 @@ impl PlotItem for PlotImage {
             let right_bottom_tf = transform.position_from_point(&right_bottom);
             Rect::from_two_pos(left_top_tf, right_bottom_tf)
         };
-        Image::new(*texture_id, *size)
-            .bg_fill(*bg_fill)
-            .tint(*tint)
-            .uv(*uv)
-            .paint_at(ui, rect);
+
+        if *bg_fill != Default::default() {
+            let mut mesh = Mesh::default();
+            mesh.add_colored_rect(rect, *bg_fill);
+            shapes.push(Shape::mesh(mesh));
+        }
+
+        let mut mesh = Mesh::with_texture(*texture_id);
+        mesh.add_rect_with_uv(rect, *uv, *tint);
+        shapes.push(Shape::mesh(mesh));
+
         if *highlight {
             shapes.push(Shape::rect_stroke(
                 rect,
